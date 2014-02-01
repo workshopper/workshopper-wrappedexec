@@ -6,7 +6,22 @@ const path    = require('path')
     , prexit  = process.exit
     , mainProgram = path.resolve(process.cwd(), process.argv[4])
 
+
 ctx.mainProgram = mainProgram
+
+
+// utility to catpture a stack trace at a particular method in an array
+ctx.$captureStack = function captureStack (fn) {
+  var err = new Error
+    , stack
+  Error._prepareStackTrace = Error.prepareStackTrace
+  Error.prepareStackTrace = function (err, stack) { return stack }
+  Error.captureStackTrace(err, fn)
+  stack = err.stack // touch it to capture it
+  Error.prepareStackTrace = Error._prepareStackTrace
+  return stack
+}
+
 
 for (var i = 0; i < mods.length; i++) {
   try {
