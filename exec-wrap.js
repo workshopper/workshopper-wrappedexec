@@ -1,13 +1,22 @@
-const path    = require('path')
-    , fs      = require('fs')
-    , mods    = JSON.parse(process.argv[2])
-    , ctxFile = process.argv[3]
-    , ctx     = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
-    , prexit  = process.exit
-    , mainProgram = path.resolve(process.cwd(), process.argv[4])
+const path        = require('path')
+    , fs          = require('fs')
+    , myargre     = /^\$execwrap\$(.*)$/
+    , myargs      = process.argv.map(function (a) {
+                      return myargre.test(a) && a.replace(myargre, '$1')
+                    }).filter(Boolean)
+    , mods        = JSON.parse(myargs[0])
+    , ctxFile     = myargs[1]
+    , ctx         = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
+    , mainProgram = ctx.mainProgram = path.resolve(process.cwd(), myargs[2])
+    , prexit      = process.exit
 
 
-ctx.mainProgram = mainProgram
+// remove evidence of main, mods, ctx
+process.argv = process.argv.filter(function (a) {
+  return !myargre.test(a)
+})
+// replace original main at position 2
+process.argv.splice(1, 1, mainProgram)
 
 
 // utility to catpture a stack trace at a particular method in an array
@@ -47,10 +56,6 @@ function writeback () {
   fs.writeFileSync(ctxFile, JSON.stringify(ctx), 'utf8')
   wrote = true
 }
-
-
-// remove evidence of main, mods, ctx
-process.argv.splice(1, 3)
 
 
 // just in case they use it

@@ -12,9 +12,9 @@ function fix (exercise) {
   exercise.wrapMods = []
 
   exercise.addVerifySetup(function setup (callback) {
-    this.submissionArgs.unshift(this.submission) // original main cmd
-    this.submissionArgs.unshift(dataPath) // path to context data
-    this.submissionArgs.unshift(JSON.stringify(exercise.wrapMods)) // list of mods to load
+    this.submissionArgs.unshift('$execwrap$' + this.submission) // original main cmd
+    this.submissionArgs.unshift('$execwrap$' + dataPath) // path to context data
+    this.submissionArgs.unshift('$execwrap$' + JSON.stringify(exercise.wrapMods)) // list of mods to load
     this.submission = execWrapPath
 
     fs.writeFile(dataPath, JSON.stringify(exercise.wrapData), 'utf8', function (err) {
