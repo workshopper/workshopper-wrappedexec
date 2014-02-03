@@ -33,7 +33,9 @@ function fix (exercise) {
 
       exercise.wrapData = JSON.parse(data)
 
-      callback(null, true) // pass, nothing to fail here
+      fs.unlink(dataPath, function () {
+        callback(null, true) // pass, nothing to fail here
+      })
     })
   })
 
