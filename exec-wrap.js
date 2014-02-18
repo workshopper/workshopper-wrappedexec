@@ -45,12 +45,12 @@ for (var i = 0; i < modFiles.length; i++) {
     // include in submission? defaults to true
     if (isSubmission && mod.wrapSubmission === false) continue
     // include in solution? defaults to false
-    if (isSolution && mod.wrapSolution != true) continue
+    if (isSolution && mod.wrapSolution) continue
+    mods.unshift(mod)
 
-    mods[i] = mod
     // give it the ctx if it exports a function
-    if (typeof mods[i] == 'function')
-      mods[i](ctx)
+    if (typeof mod == 'function')
+      mod(ctx)
   } catch (e) {
     console.error('Internal error loading wrapped module', modFiles[i])
   }
@@ -65,7 +65,7 @@ function finish () {
   if (wrote)
     return
 
-  for (var i = 0; i < modFiles.length; i++) {
+  for (var i = 0; i < mods.length; i++) {
     if (mods[i] && typeof mods[i].finish == 'function')
       mods[i].finish(ctx)
   }
