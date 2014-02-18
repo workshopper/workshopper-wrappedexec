@@ -1,16 +1,17 @@
-const path        = require('path')
-    , fs          = require('fs')
-    , myargre     = /^\$execwrap\$(.*)$/
-    , myargs      = process.argv.map(function (a) {
-                      return myargre.test(a) && a.replace(myargre, '$1')
-                    }).filter(Boolean)
-    , modFiles    = JSON.parse(myargs[0])
-    , mods        = []
-    , ctxFile     = myargs[1]
-    , ctx         = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
-    , mainProgram = ctx.mainProgram = path.resolve(process.cwd(), myargs[2])
-    , prexit      = process.exit
-
+const path          = require('path')
+    , fs            = require('fs')
+    , myargre       = /^\$execwrap\$(.*)$/
+    , myargs        = process.argv.map(function (a) {
+                        return myargre.test(a) && a.replace(myargre, '$1')
+                      }).filter(Boolean)
+    , modFiles      = JSON.parse(myargs[0])
+    , mods          = []
+    , ctxFile       = myargs[1]
+    , ctx           = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
+    , mainProgram   = ctx.mainProgram = path.resolve(process.cwd(), myargs[2])
+    , prexit        = process.exit
+    , isSolution    = myargs[3] === 'solution'
+    , isSubmission  = myargs[3] === 'submission'
 
 // remove evidence of main, modFiles, ctx
 process.argv = process.argv.filter(function (a) {
@@ -35,10 +36,18 @@ ctx.$captureStack = function captureStack (fn) {
 }
 
 
+
 for (var i = 0; i < modFiles.length; i++) {
   try {
     // load module
-    mods[i] = require(modFiles[i])
+    var mod = require(modFiles[i])
+
+    // include in submission? defaults to true
+    if (isSubmission && mod.wrapSubmission === false) continue
+    // include in solution? defaults to false
+    if (isSolution && mod.wrapSolution != true) continue
+
+    mods[i] = mod
     // give it the ctx if it exports a function
     if (typeof mods[i] == 'function')
       mods[i](ctx)
