@@ -4,14 +4,15 @@ const path        = require('path')
     , myargs      = process.argv.map(function (a) {
                       return myargre.test(a) && a.replace(myargre, '$1')
                     }).filter(Boolean)
-    , mods        = JSON.parse(myargs[0])
+    , modFiles    = JSON.parse(myargs[0])
+    , mods        = []
     , ctxFile     = myargs[1]
     , ctx         = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
     , mainProgram = ctx.mainProgram = path.resolve(process.cwd(), myargs[2])
     , prexit      = process.exit
 
 
-// remove evidence of main, mods, ctx
+// remove evidence of main, modFiles, ctx
 process.argv = process.argv.filter(function (a) {
   return !myargre.test(a)
 })
@@ -23,24 +24,26 @@ process.argv.splice(1, 1, mainProgram)
 ctx.$captureStack = function captureStack (fn) {
   var err = new Error
     , stack
+
   Error._prepareStackTrace = Error.prepareStackTrace
   Error.prepareStackTrace = function (err, stack) { return stack }
   Error.captureStackTrace(err, fn)
   stack = err.stack // touch it to capture it
   Error.prepareStackTrace = Error._prepareStackTrace
+
   return stack
 }
 
 
-for (var i = 0; i < mods.length; i++) {
+for (var i = 0; i < modFiles.length; i++) {
   try {
     // load module
-    var rm = require(mods[i])
+    mods[i] = require(modFiles[i])
     // give it the ctx if it exports a function
-    if (typeof rm == 'function')
-      rm(ctx)
+    if (typeof mods[i] == 'function')
+      mods[i](ctx)
   } catch (e) {
-    console.error('Internal error loading wrapped module', mods[i])
+    console.error('Internal error loading wrapped module', modFiles[i])
   }
 }
 
@@ -49,9 +52,14 @@ var wrote = false
 
 
 // write back the context data so it can be read by the parent
-function writeback () {
+function finish () {
   if (wrote)
     return
+
+  for (var i = 0; i < modFiles.length; i++) {
+    if (mods[i] && typeof mods[i].finish == 'function')
+      mods[i].finish(ctx)
+  }
 
   fs.writeFileSync(ctxFile, JSON.stringify(ctx), 'utf8')
   wrote = true
@@ -60,7 +68,7 @@ function writeback () {
 
 // just in case they use it
 process.exit = function () {
-  writeback()
+  finish()
   prexit.apply(process, arguments)
 }
 
@@ -69,5 +77,5 @@ try {
   // run original main as if it were loaded directly
   require(mainProgram)
 } finally {
-  writeback()
+  finish()
 }
