@@ -12,6 +12,14 @@ function fix (exercise) {
   exercise.wrapMods = []
 
   exercise.addVerifySetup(function setup (callback) {
+
+    this.solutionArgs.unshift('$execwrap$solution') // flag if solution
+    this.solutionArgs.unshift('$execwrap$' + this.solution) // original main cmd
+    this.solutionArgs.unshift('$execwrap$' + dataPath) // path to context data
+    this.solutionArgs.unshift('$execwrap$' + JSON.stringify(exercise.wrapMods)) // list of mods to load
+    this.solution = execWrapPath
+
+    this.submissionArgs.unshift('$execwrap$submission') // flag if submission
     this.submissionArgs.unshift('$execwrap$' + this.submission) // original main cmd
     this.submissionArgs.unshift('$execwrap$' + dataPath) // path to context data
     this.submissionArgs.unshift('$execwrap$' + JSON.stringify(exercise.wrapMods)) // list of mods to load
