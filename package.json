@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "xtend": "~2.1.2"
+    "xtend": "~2.1.2",
+    "after": "~0.8.1"
   }
 }
