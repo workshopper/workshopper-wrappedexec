@@ -45,7 +45,7 @@ for (var i = 0; i < modFiles.length; i++) {
     // include in submission? defaults to true
     if (isSubmission && mod.wrapSubmission === false) continue
     // include in solution? defaults to false
-    if (isSolution && mod.wrapSolution) continue
+    if (isSolution && !mod.wrapSolution) continue
     mods.unshift(mod)
 
     // give it the ctx if it exports a function
