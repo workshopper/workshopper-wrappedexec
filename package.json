@@ -1,6 +1,6 @@
 {
   "name": "workshopper-wrappedexec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A utility to wrap a Workshopper exercise execution for fancy hackery",
   "main": "./wrappedexec.js",
   "author": "Rod Vagg <rod@vagg.org> (https://github.com/rvagg)",
