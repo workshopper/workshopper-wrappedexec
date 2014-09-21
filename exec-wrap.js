@@ -8,7 +8,7 @@ const path          = require('path')
     , mods          = []
     , ctxFile       = myargs[1]
     , ctx           = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
-    , mainProgram   = ctx.mainProgram = path.resolve(process.cwd(), myargs[2])
+    , mainProgram   = ctx.mainProgram = fs.realpathSync(path.resolve(process.cwd(), myargs[2]))
     , prexit        = process.exit
     , isSolution    = myargs[3] === 'solution'
     , isSubmission  = myargs[3] === 'submission'
