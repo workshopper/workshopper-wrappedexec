@@ -9,7 +9,6 @@ const path          = require('path')
     , ctxFile       = myargs[1]
     , ctx           = JSON.parse(fs.readFileSync(ctxFile, 'utf8'))
     , mainProgram   = ctx.mainProgram = fs.realpathSync(path.resolve(process.cwd(), myargs[2]))
-    , prexit        = process.exit
     , isSolution    = myargs[3] === 'solution'
     , isSubmission  = myargs[3] === 'submission'
 
@@ -74,17 +73,9 @@ function finish () {
   wrote = true
 }
 
-
-// just in case they use it
-process.exit = function () {
+process.on('exit', function () {
   finish()
-  prexit.apply(process, arguments)
-}
+})
 
-
-try {
-  // run original main as if it were loaded directly
-  require(mainProgram)
-} finally {
-  finish()
-}
+// run original main as if it were loaded directly
+require(mainProgram)
