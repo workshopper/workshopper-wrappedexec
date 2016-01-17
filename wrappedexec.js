@@ -6,7 +6,13 @@ const execWrapPath = require.resolve('./exec-wrap')
     , xtend        = require('xtend')
     , after        = require('after')
 
-function fix (exercise) {
+const modeToFunc = { all   : ''
+                   , verify: 'Verify'
+                   , run   : 'Run'
+                   }
+
+function fix (exercise, mode) {
+  var func = modeToFunc[mode || 'verify']
   var dataPath = path.join(os.tmpDir(), '~workshopper.wraptmp.' + process.pid)
   var submissionPath = dataPath + '-submission'
   var solutionPath   = dataPath + '-solution'
@@ -14,7 +20,10 @@ function fix (exercise) {
   exercise.wrapData = {}
   exercise.wrapMods = []
 
-  exercise.addVerifySetup(function setup (callback) {
+  exercise['add' + func + 'Setup'](function setup (_mode, callback) {
+
+    if (mode !== 'all')
+      callback = _mode
 
     this.solutionArgs.unshift('$execwrap$solution') // flag if solution
     this.solutionArgs.unshift('$execwrap$' + this.solution) // original main cmd
@@ -42,7 +51,11 @@ function fix (exercise) {
     })
   })
 
-  exercise.addVerifyProcessor(function (callback) {
+  exercise['add' + func + 'Processor'](function (_mode, callback) {
+
+    if (mode !== 'all')
+      callback = _mode
+
     // sync... yes.. unfortunately, otherwise we'll have timing problems
     fs.readFile(submissionPath, 'utf8', function (err, data) {
       if (err)
@@ -75,9 +88,9 @@ function fix (exercise) {
   }
 }
 
-function wrappedexec (exercise) {
+function wrappedexec (exercise, mode) {
   if (typeof exercise.wrapInject != 'function' || typeof exercise.wrapSet != 'function')
-    fix(exercise)
+    fix(exercise, mode)
   return exercise
 }
 
