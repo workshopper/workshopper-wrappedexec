@@ -52,6 +52,7 @@ for (var i = 0; i < modFiles.length; i++) {
     if (typeof mod == 'function')
       mod(ctx)
   } catch (e) {
+    if (process.env.NODE_ENV === 'development') throw e
     console.error('Internal error loading wrapped module', modFiles[i])
   }
 }
